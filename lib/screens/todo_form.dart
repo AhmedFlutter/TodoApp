@@ -5,7 +5,6 @@ import 'package:todoapp/shared/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:todoapp/shared/functions.dart';
-import 'package:provider/provider.dart';
 
 
 class TodoForm extends StatefulWidget {
@@ -29,6 +28,7 @@ class _TodoFormState extends State<TodoForm> {
   TextEditingController todoDate = TextEditingController();
   String dropdownValue = 'High';
   List<String> priority = ['High', 'Low'];
+  TodoListViewModel todoListViewModel = TodoListViewModel();
 
   final _formKey = GlobalKey<FormState>();
   _TodoFormState(this.title, this.todoViewModel);
@@ -43,7 +43,7 @@ class _TodoFormState extends State<TodoForm> {
 
   @override
   Widget build(BuildContext context) {
-    TodoListViewModel todoListViewModel = Provider.of<TodoListViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text(this.title)),
@@ -116,7 +116,7 @@ class _TodoFormState extends State<TodoForm> {
                               var result =  await todoListViewModel.updateTodo(todoViewModel.id,todoName.text, todoDate.text, priorityInt);
                               if (result != null) {
                                 Navigator.pop(context);
-                                showAlertDialog("Info", "Todo has been added Successfully", context);
+                                showAlertDialog("Info", "Todo has been updated Successfully", context);
                               }
                             }
                           }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:todoapp/models/todo.dart';
 import 'package:todoapp/shared/screen_arguments.dart';
 import 'package:todoapp/viewmodels/todo_list_view_modal.dart';
@@ -15,10 +14,12 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+
+  TodoListViewModel todoListViewModel = TodoListViewModel();
+
   @override
   void initState() {
     super.initState();
-    Provider.of<TodoListViewModel>(context, listen: false).populateTodos();
   }
   @override
   Widget build(BuildContext context) {
@@ -36,23 +37,25 @@ class _TodoListState extends State<TodoList> {
           );
         }
       ),
-      body: Consumer<TodoListViewModel>(
-        builder: (context, todoList, child) {
-           return ListView.builder(
-              itemCount: todoList.todos.length,
+      body: StreamBuilder(
+        stream: todoListViewModel.populateTodos(),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          var todoList = snapshot.data;
+          return snapshot.data == null ? Center(child: CircularProgressIndicator()) : ListView.builder(
+              itemCount: todoList.length,
               itemBuilder: (BuildContext context, int index) {
               return Card(
                 child: ListTile(
-                  title: Text(todoList.todos[index].name),
-                  subtitle: Text(todoList.todos[index].date),
+                  title: Text(todoList[index].name),
+                  subtitle: Text(todoList[index].date),
                   leading: CircleAvatar(
                     child: Icon(Icons.arrow_right),
-                    backgroundColor: getPriorityColor(todoList.todos[index].priority),
+                    backgroundColor: getPriorityColor(todoList[index].priority),
                   ),
                   trailing: GestureDetector(
                     child: Icon(Icons.delete),
                     onTap: () async {
-                      var result = await todoList.deleteTodo(todoList.todos[index].id);
+                      var result = await todoListViewModel.deleteTodo(todoList[index]);
                       if (result != null) {
                         showSnackBar("Todo has been deleted Successfully", context);
                       }
@@ -62,15 +65,16 @@ class _TodoListState extends State<TodoList> {
                     Navigator.pushNamed(
                       context,
                       '/todo',
-                      arguments: ScreenArguments(title: "Update Todo", todoViewModel: todoList.todos[index])
+                      arguments: ScreenArguments(title: "Update Todo", todoViewModel: todoList[index])
                     );
                   },
                 ),
               );
             },
           );
-        }
-      )
+        },
+      ),
+
     );
   }
 }
